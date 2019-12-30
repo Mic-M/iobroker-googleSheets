@@ -7,6 +7,7 @@
  * Support:             https://forum.iobroker.net/topic/28193/
  * 
  * Change log:
+ * 0.3 - Bug fix
  * 0.2 - Added JSON state for JSON Table in VIS (Widget: "basic - Table")
  * 0.1 - initial version
  ******************************************************************************/
@@ -176,10 +177,16 @@ function fetchGoogleSheetsData() {
             let duplicateChecker = []; // Hier nehmen wir alle Zellwerte von GOOGLE_COL_NO_NAME auf, um zu Prüfen, ob Duplikate vorliegen.
             for (let i = 1; i < returnObject.length; i++) {
 
-                jsonResult += (jsonResult.slice(-1) === '}') ? ', {' : '{'; // Komma dazu, falls es bereits Eintrag gibt
-
+                // Name des Wertpapiers; Ist Bestandteil des States
                 let lpReturnObj = returnObject[i];
                 let name = lpReturnObj[GOOGLE_COL_NO_NAME - 1]; // -1, da wir in der "Konfiguration" mit 1 als Zähler anfangen, nicht 0.
+                if (cleanStringForState(name) === '') {
+                    // Abbruch, Name darf nicht leer sein.
+                    continue; // we break the current iteration of the loop
+                }
+
+                jsonResult += (jsonResult.slice(-1) === '}') ? ', {' : '{'; // Komma dazu, falls es bereits Eintrag gibt
+
                 let targetStatePart1 = STATE_PATH + '.' + (cleanStringForState(name))
 
                 // Wir durchlaufen jede Zelle des aktuellen Zeilen-Arrays, um die States anzulegen.
@@ -286,6 +293,7 @@ function fetchGoogleSheetsData() {
  * @return {string}   the processed string 
  */
 function cleanStringForState(strInput) {
+    if(strInput === undefined) strInput = '';
     let strResult = strInput.replace(/([^a-zA-ZäöüÄÖÜß0-9\-_]+)/gi, '');
     return strResult;
 }
@@ -298,6 +306,7 @@ function cleanStringForState(strInput) {
  * @return {string}   the processed string 
  */
 function cleanString2(strInput) {
+    if(strInput === undefined) strInput = '';
     let strResult = strInput.replace(/([^a-zA-ZäöüÄÖÜß0-9.\-_\s\/\(\)]+)/gi, '');
     return strResult;
 }
@@ -308,6 +317,7 @@ function cleanString2(strInput) {
  * @return {string}   the processed string 
  */
 function cleanStringJson(strInput) {
+    if(strInput === undefined) strInput = '';
     let strResult = strInput.replace(/([^a-zA-ZäöüÄÖÜß0-9.,':€@$%&\-_\s\/\(\)]+)/gi, '');
     return strResult;
 }
